@@ -14,26 +14,28 @@ const jsPsych = initJsPsych({
 });
 
 const group = jsPsych.randomization.sampleWithoutReplacement(["male", "female"], 1)[0];
-const faceIDs = Array.from({ length: 10 }, (_, i) => (i + 1).toString().padStart(2, "0"));
-const audioIDs = Array.from({ length: 20 }, (_, i) => (i + 1).toString().padStart(2, "0"));
+const faceIDs = Array.from({ length: 120 }, (_, i) => (i + 1).toString().padStart(3, "0"));
+const audioIDs = Array.from({ length: 120 }, (_, i) => (i + 1).toString().padStart(3, "0"));
 
-const imageQuestions = [
-  "How dominant do you think this person is?",
-  "How trustworthy do you think this person is?",
-  "How honest do you think this person is?",
-  "How tall do you think this person is?"
-];
+const makeSlider = (stimulusType, stimulusPath, question, min, max, step, labels) => {
+  let stimulusHTML = stimulusType === "image"
+    ? `<img src='${stimulusPath}' height='300'><br>`
+    : `<div style='text-align: center;'><p><b>Click the play button to listen:</b></p><audio controls style='margin-bottom: 10px;'><source src='${stimulusPath}' type='audio/wav'></audio></div>`;
 
-const makeSlider = (question, min, max, step, labels) => {
+  const scaleHTML = Array.from({ length: (max - min + 1) }, (_, i) => `<span>${min + i}</span>`).join("<span style='flex:1'></span>");
+
   return {
     type: jsPsychSurveyHtmlForm,
-    preamble: `<p><b>${question}</b></p>`,
-    html: `<label for='response'>${question}</label><br>
+    preamble: `${stimulusHTML}<p><b>${question}</b></p>`,
+    html: `
+      <label for='response'>${question}</label><br>
       <input type='range' name='response' min='${min}' max='${max}' step='${step}' style='width: 100%;'><br>
       <div style='display: flex; justify-content: space-between;'>
-        <span>${labels[0]}</span><span>${labels[1]}</span>
-      </div>`,
-    data: { question: question }
+        ${scaleHTML}
+      </div>
+      <br>
+    `,
+    data: { question: question, stimulus: stimulusPath, modality: stimulusType }
   };
 };
 
@@ -60,8 +62,8 @@ const consent = {
 const instructions = {
   type: jsPsychHtmlKeyboardResponse,
   stimulus: `
-    <p>You will be shown faces and voices in random order.</p>
-    <p>After each one, answer four questions about your impression.</p>
+    <p>You will be shown faces and voices in alternating order.</p>
+    <p>After each one, answer four questions about your impression using a slider.</p>
     <p>Press SPACE to begin.</p>
   `,
   choices: [' ']
@@ -71,40 +73,21 @@ let timeline = [consent, instructions];
 
 let imageTrials = faceIDs.map(faceID => {
   const img = `all_images/${group}_face${faceID}_1.png`;
-  const questions = [
-    makeSlider("How dominant do you think this person is?", 1, 7, 1, ["Not at all", "Extremely"]),
-    makeSlider("How trustworthy do you think this person is?", 1, 7, 1, ["Not at all", "Extremely"]),
-    makeSlider("How honest do you think this person is?", 1, 7, 1, ["Not at all", "Extremely"]),
-    makeSlider("How tall do you think this person is?", 55, 65, 1, ["5'5\"", "6'5\""])
-  ];
   return [
-    {
-      type: jsPsychHtmlKeyboardResponse,
-      stimulus: `<img src='${img}' height='300'><p>Press SPACE to answer questions.</p>`,
-      choices: [' '],
-      data: { modality: "image", stimulus: img }
-    },
-    ...questions.map(q => ({ ...q, data: { ...q.data, stimulus: img, modality: "image" } }))
+    makeSlider("image", img, "How dominant do you think this person is?", 1, 7, 1, ["1", "7"]),
+    makeSlider("image", img, "How trustworthy do you think this person is?", 1, 7, 1, ["1", "7"]),
+    makeSlider("image", img, "How honest do you think this person is?", 1, 7, 1, ["1", "7"]),
+    makeSlider("image", img, "How tall do you think this person is?", 55, 65, 1, ["5'5\"", "6'5\""])
   ];
 }).flat();
 
 let audioTrials = audioIDs.map(audioID => {
   const audio = `all_audios/${group}_voice${audioID}_pitch1.wav`;
-  const questions = [
-    makeSlider("How dominant do you think this person is?", 1, 7, 1, ["Not at all", "Extremely"]),
-    makeSlider("How trustworthy do you think this person is?", 1, 7, 1, ["Not at all", "Extremely"]),
-    makeSlider("How honest do you think this person is?", 1, 7, 1, ["Not at all", "Extremely"]),
-    makeSlider("How tall do you think this person is?", 55, 65, 1, ["5'5\"", "6'5\""])
-  ];
   return [
-    {
-      type: jsPsychAudioKeyboardResponse,
-      stimulus: audio,
-      prompt: "<p>Press SPACE to answer questions after listening.</p>",
-      choices: [' '],
-      data: { modality: "audio", stimulus: audio }
-    },
-    ...questions.map(q => ({ ...q, data: { ...q.data, stimulus: audio, modality: "audio" } }))
+    makeSlider("audio", audio, "How dominant do you think this person is?", 1, 7, 1, ["1", "7"]),
+    makeSlider("audio", audio, "How trustworthy do you think this person is?", 1, 7, 1, ["1", "7"]),
+    makeSlider("audio", audio, "How honest do you think this person is?", 1, 7, 1, ["1", "7"]),
+    makeSlider("audio", audio, "How tall do you think this person is?", 55, 65, 1, ["5'5\"", "6'5\""])
   ];
 }).flat();
 
