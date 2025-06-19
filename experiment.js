@@ -74,37 +74,41 @@ const instructions = {
 
 let timeline = [consent, instructions];
 
-const imageTrials = blockOrder.flatMap(blockKey => {
-  return blockMap[blockKey].flatMap(id => {
-    return Array.from({ length: 6 }, (_, v) => `${group}_face${id}_${v + 1}.png`).map(imgName => {
-      const imgPath = `all_images/${imgName}`;
-      return [
-        makeSlider("image", imgPath, "How dominant do you think this person is?", 1, 7, 1, ["1", "7"]),
-        makeSlider("image", imgPath, "How trustworthy do you think this person is?", 1, 7, 1, ["1", "7"]),
-        makeSlider("image", imgPath, "How honest do you think this person is?", 1, 7, 1, ["1", "7"]),
-        makeSlider("image", imgPath, "How tall do you think this person is?", 55, 65, 1, ["5'5\"", "6'5\""])
-      ];
-    });
-  });
-}).flat();
+let imageTrials = [];
+let audioTrials = [];
 
-const audioTrials = blockOrder.flatMap(blockKey => {
-  return blockMap[blockKey].flatMap(id => {
-    return Array.from({ length: 3 }, (_, p) => `${group}_voice${id}_pitch${p + 1}.wav`).map(audioName => {
-      const audioPath = `all_audios/${audioName}`;
-      return [
-        makeSlider("audio", audioPath, "How dominant do you think this person is?", 1, 7, 1, ["1", "7"]),
-        makeSlider("audio", audioPath, "How trustworthy do you think this person is?", 1, 7, 1, ["1", "7"]),
-        makeSlider("audio", audioPath, "How honest do you think this person is?", 1, 7, 1, ["1", "7"]),
-        makeSlider("audio", audioPath, "How tall do you think this person is?", 55, 65, 1, ["5'5\"", "6'5\""])
-      ];
-    });
-  });
-}).flat();
+blockOrder.forEach(blockKey => {
+  const ids = blockMap[blockKey];
 
+  ids.forEach(id => {
+    // Push 6 image variants × 4 questions each
+    for (let v = 1; v <= 6; v++) {
+      const img = `all_images/${group}_face${id}_${v}.png`;
+      imageTrials.push(
+        makeSlider("image", img, "How dominant do you think this person is?", 1, 7, 1),
+        makeSlider("image", img, "How trustworthy do you think this person is?", 1, 7, 1),
+        makeSlider("image", img, "How honest do you think this person is?", 1, 7, 1),
+        makeSlider("image", img, "How tall do you think this person is?", 55, 65, 1)
+      );
+    }
+
+    // Push 3 audio variants × 4 questions each
+    for (let p = 1; p <= 3; p++) {
+      const audio = `all_audios/${group}_voice${id}_pitch${p}.wav`;
+      audioTrials.push(
+        makeSlider("audio", audio, "How dominant do you think this person is?", 1, 7, 1),
+        makeSlider("audio", audio, "How trustworthy do you think this person is?", 1, 7, 1),
+        makeSlider("audio", audio, "How honest do you think this person is?", 1, 7, 1),
+        makeSlider("audio", audio, "How tall do you think this person is?", 55, 65, 1)
+      );
+    }
+  });
+});
+
+// Interleave: 10 images then 10 audios, repeat
 while (imageTrials.length || audioTrials.length) {
-  if (imageTrials.length) timeline.push(...imageTrials.splice(0, 10));
-  if (audioTrials.length) timeline.push(...audioTrials.splice(0, 10));
+  if (imageTrials.length) timeline.push(...imageTrials.splice(0, 40));
+  if (audioTrials.length) timeline.push(...audioTrials.splice(0, 40));
 }
 
 timeline.push({
