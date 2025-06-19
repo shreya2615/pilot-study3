@@ -13,7 +13,7 @@ const imageAudioFlow = [
 ];
 
 const logToSheet = trialData => {
-  fetch("https://script.google.com/macros/s/AKfycbyE0Z8J3_SInDQuppNN9md8krkqDo_PlzXOeToO7a-f8CTugUy3fKGYT6vgzmzs22TGrA/exec", {
+  fetch("https://script.google.com/macros/s/AKfycbwYsAlfJ-iaUD5vU93CravpfjDrUwhNtq0ELbQLb8wzLOXfMi0QFKMmkZpsja9lNiYJ3w/exec", {
     method: "POST",
     mode: "no-cors",
     headers: {
