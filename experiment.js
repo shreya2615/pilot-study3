@@ -1,7 +1,7 @@
 // === experiment.js ===
 
 const jsPsych = initJsPsych({
-  on_finish: () => {
+  on_data_update: () => {
     fetch("https://script.google.com/macros/s/AKfycbwF5CwxYFuKVV3k0Ua0FQogfCQ4FE0V9-FYexYHP23UK4mfoLMZyUHv1k-Ech69mSGpdA/exec", {
       method: "POST",
       mode: "no-cors",
