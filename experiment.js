@@ -32,13 +32,13 @@ const makeSlider = (stimulusType, stimulusPath, question, min, max, step, labels
 
   return {
     type: jsPsychSurveyHtmlForm,
-    preamble: `${stimulusHTML}<p><i>Please use the slider to make your selection.</i></p>`,
+    preamble: `${stimulusHTML}`,
     html: `
+      <p><b>${question}</b></p>
+      <p><i>Please use the slider to make your selection.</i></p>
+      <label for='response'>${question}</label><br>
       <input type='range' name='response' min='${min}' max='${max}' step='${step}' style='width: 100%;'><br>
-      <div style='display: flex; justify-content: space-between;'>
-        ${scaleHTML}
-      </div>
-      <br>
+      <div style='display: flex; justify-content: space-between;'>${scaleHTML}</div><br>
     `,
     data: { question: question, stimulus: stimulusPath, modality: stimulusType },
     on_finish: data => logToSheet(data)
