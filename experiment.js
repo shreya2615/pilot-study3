@@ -14,8 +14,12 @@ const jsPsych = initJsPsych({
 });
 
 const group = jsPsych.randomization.sampleWithoutReplacement(["male", "female"], 1)[0];
-const faceIDs = Array.from({ length: 120 }, (_, i) => (i + 1).toString().padStart(3, "0"));
-const audioIDs = Array.from({ length: 120 }, (_, i) => (i + 1).toString().padStart(3, "0"));
+const blockMap = {
+  a: Array.from({ length: 10 }, (_, i) => (i + 1).toString().padStart(2, "0")),
+  b: Array.from({ length: 10 }, (_, i) => (i + 11).toString().padStart(2, "0")),
+  c: Array.from({ length: 10 }, (_, i) => (i + 21).toString().padStart(2, "0"))
+};
+const blockOrder = ["a", "b", "c"];
 
 const makeSlider = (stimulusType, stimulusPath, question, min, max, step, labels) => {
   let stimulusHTML = stimulusType === "image"
@@ -62,7 +66,7 @@ const consent = {
 const instructions = {
   type: jsPsychHtmlKeyboardResponse,
   stimulus: `
-    <p>You will be shown faces and voices in alternating order.</p>
+    <p>You will be shown faces and voices in random order.</p>
     <p>After each one, answer four questions about your impression using a slider.</p>
     <p>Press SPACE to begin.</p>
   `,
@@ -71,33 +75,38 @@ const instructions = {
 
 let timeline = [consent, instructions];
 
-let imageTrials = faceIDs.map(faceID => {
-  const img = `all_images/${group}_face${faceID}_1.png`;
-  return [
-    makeSlider("image", img, "How dominant do you think this person is?", 1, 7, 1, ["1", "7"]),
-    makeSlider("image", img, "How trustworthy do you think this person is?", 1, 7, 1, ["1", "7"]),
-    makeSlider("image", img, "How honest do you think this person is?", 1, 7, 1, ["1", "7"]),
-    makeSlider("image", img, "How tall do you think this person is?", 55, 65, 1, ["5'5\"", "6'5\""])
-  ];
+const imageTrials = blockOrder.flatMap(blockKey => {
+  return blockMap[blockKey].flatMap(id => {
+    return Array.from({ length: 6 }, (_, v) => `${group}_face${id}_${v + 1}.png`).map(imgName => {
+      const imgPath = `all_images/${imgName}`;
+      return [
+        makeSlider("image", imgPath, "How dominant do you think this person is?", 1, 7, 1, ["1", "7"]),
+        makeSlider("image", imgPath, "How trustworthy do you think this person is?", 1, 7, 1, ["1", "7"]),
+        makeSlider("image", imgPath, "How honest do you think this person is?", 1, 7, 1, ["1", "7"]),
+        makeSlider("image", imgPath, "How tall do you think this person is?", 55, 65, 1, ["5'5\"", "6'5\""])
+      ];
+    });
+  });
 }).flat();
 
-let audioTrials = audioIDs.map(audioID => {
-  const audio = `all_audios/${group}_voice${audioID}_pitch1.wav`;
-  return [
-    makeSlider("audio", audio, "How dominant do you think this person is?", 1, 7, 1, ["1", "7"]),
-    makeSlider("audio", audio, "How trustworthy do you think this person is?", 1, 7, 1, ["1", "7"]),
-    makeSlider("audio", audio, "How honest do you think this person is?", 1, 7, 1, ["1", "7"]),
-    makeSlider("audio", audio, "How tall do you think this person is?", 55, 65, 1, ["5'5\"", "6'5\""])
-  ];
+const audioTrials = blockOrder.flatMap(blockKey => {
+  return blockMap[blockKey].flatMap(id => {
+    return Array.from({ length: 3 }, (_, p) => `${group}_voice${id}_pitch${p + 1}.wav`).map(audioName => {
+      const audioPath = `all_audios/${audioName}`;
+      return [
+        makeSlider("audio", audioPath, "How dominant do you think this person is?", 1, 7, 1, ["1", "7"]),
+        makeSlider("audio", audioPath, "How trustworthy do you think this person is?", 1, 7, 1, ["1", "7"]),
+        makeSlider("audio", audioPath, "How honest do you think this person is?", 1, 7, 1, ["1", "7"]),
+        makeSlider("audio", audioPath, "How tall do you think this person is?", 55, 65, 1, ["5'5\"", "6'5\""])
+      ];
+    });
+  });
 }).flat();
 
-let combinedTrials = [];
 while (imageTrials.length || audioTrials.length) {
-  if (imageTrials.length) combinedTrials.push(...imageTrials.splice(0, 10));
-  if (audioTrials.length) combinedTrials.push(...audioTrials.splice(0, 10));
+  if (imageTrials.length) timeline.push(...imageTrials.splice(0, 10));
+  if (audioTrials.length) timeline.push(...audioTrials.splice(0, 10));
 }
-
-timeline.push(...combinedTrials);
 
 timeline.push({
   type: jsPsychHtmlKeyboardResponse,
