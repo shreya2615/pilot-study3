@@ -56,7 +56,7 @@ const consent = {
         👉 Click here to open the Google Form
       </a>
     </p>
-    <p style="margin-top: 40px;">Press SPACE to continue or 0 to exit.</p>
+    <p style="margin-top: 40px;">Press SPACE to continue.</p>
   `,
   choices: [' ', '0'],
   on_finish: data => {
@@ -68,7 +68,7 @@ const instructions = {
   type: jsPsychHtmlKeyboardResponse,
   stimulus: `
     <p>You will be shown faces and voices in alternating order.</p>
-    <p>After each one, answer four questions about your impression using a slider.</p>
+    <p>After each one, you will be required to answer four questions about your impression using a slider.</p>
     <p>Press SPACE to begin.</p>
   `,
   choices: [' ']
@@ -81,10 +81,10 @@ imageAudioFlow.forEach(groupSet => {
     for (let v = 1; v <= 6; v++) {
       const facePath = `all_images/${group}_face${imgID.toString().padStart(2, "0")}_${v}.png`;
       timeline.push(
-        makeSlider("image", facePath, "How dominant do you think this person is?", 1, 7, 1),
-        makeSlider("image", facePath, "How trustworthy do you think this person is?", 1, 7, 1),
-        makeSlider("image", facePath, "How honest do you think this person is?", 1, 7, 1),
-        makeSlider("image", facePath, "How tall do you think this person is?", 1, 13, 1)
+        makeSlider("image", facePath, "1. How dominant do you think this person is on a scale of 1-7 with 1 being not at all and 7 being very?", 1, 7, 1),
+        makeSlider("image", facePath, "2. How trustworthy do you think this person is on a scale of 1-7 with 1 being not at all and 7 being very?", 1, 7, 1),
+        makeSlider("image", facePath, "3. How honest do you think this person is on a scale of 1-7 with 1 being not at all and 7 being very?", 1, 7, 1),
+        makeSlider("image", facePath, "4. How tall do you think this person is from 5'5 to 6'5?", 1, 13, 1)
       );
     }
   });
@@ -93,10 +93,10 @@ imageAudioFlow.forEach(groupSet => {
     for (let p = 1; p <= 3; p++) {
       const audioPath = `all_audios/${group}_voice${audioID.toString().padStart(2, "0")}_pitch${p}.wav`;
       timeline.push(
-        makeSlider("audio", audioPath, "How dominant do you think this person is?", 1, 7, 1),
-        makeSlider("audio", audioPath, "How trustworthy do you think this person is?", 1, 7, 1),
-        makeSlider("audio", audioPath, "How honest do you think this person is?", 1, 7, 1),
-        makeSlider("audio", audioPath, "How tall do you think this person is?", 1, 13, 1)
+        makeSlider("audio", audioPath, "1. How dominant do you think this person is on a scale of 1-7 with 1 being not at all and 7 being very?", 1, 7, 1),
+        makeSlider("audio", audioPath, "2. How trustworthy do you think this person is on a scale of 1-7 with 1 being not at all and 7 being very?", 1, 7, 1),
+        makeSlider("audio", audioPath, "3. How honest do you think this person is on a scale of 1-7 with 1 being not at all and 7 being very?", 1, 7, 1),
+        makeSlider("audio", audioPath, "4. How tall do you think this person is on a scale of 1-7 with 1 being not at all and 7 being very?", 1, 13, 1)
       );
     }
   });
