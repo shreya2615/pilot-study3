@@ -26,7 +26,7 @@ const makeSlider = (stimulusType, stimulusPath, question, min, max, step, labels
     ? `<img src='${stimulusPath}' height='300'><br>`
     : `<div style='text-align: center;'><p><b>Click the play button to listen:</b></p><audio controls style='margin-bottom: 10px;'><source src='${stimulusPath}' type='audio/wav'></audio></div>`;
 
-  const scaleHTML = Array.from({ length: (max - min + 1) }, (_, i) => `<span>${min + i}</span>`).join("<span style='flex:1'></span>");
+  const scaleHTML = (question.includes("tall") ? ["5'5\"", "5'6\"", "5'7\"", "5'8\"", "5'9\"", "5'10\"", "5'11\"", "6'0\"", "6'1\"", "6'2\"", "6'3\"", "6'4\"", "6'5\""] : Array.from({ length: (max - min + 1) }, (_, i) => `${min + i}`)).join("<span style='flex:1'></span>");
 
   return {
     type: jsPsychSurveyHtmlForm,
@@ -88,7 +88,7 @@ blockOrder.forEach(blockKey => {
         makeSlider("image", img, "How dominant do you think this person is?", 1, 7, 1),
         makeSlider("image", img, "How trustworthy do you think this person is?", 1, 7, 1),
         makeSlider("image", img, "How honest do you think this person is?", 1, 7, 1),
-        makeSlider("image", img, "How tall do you think this person is?", 55, 65, 1)
+        makeSlider("image", img, "How tall do you think this person is?", 1, 13, 1)
       );
     }
 
@@ -99,7 +99,7 @@ blockOrder.forEach(blockKey => {
         makeSlider("audio", audio, "How dominant do you think this person is?", 1, 7, 1),
         makeSlider("audio", audio, "How trustworthy do you think this person is?", 1, 7, 1),
         makeSlider("audio", audio, "How honest do you think this person is?", 1, 7, 1),
-        makeSlider("audio", audio, "How tall do you think this person is?", 55, 65, 1)
+        makeSlider("audio", audio, "How tall do you think this person is?", 1, 13, 1)
       );
     }
   });
