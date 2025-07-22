@@ -1,5 +1,3 @@
-// === experiment.js ===
-
 const jsPsych = initJsPsych();
 
 const group = jsPsych.randomization.sampleWithoutReplacement(["male", "female"], 1)[0];
@@ -48,7 +46,7 @@ const consent = {
     <h2>Welcome to the experiment</h2>
     <p>In this study, you will complete a series of tasks involving images and audio clips.</p>
     <p style="margin-top: 20px;">
-      <strong>Before you being please ensure you are in a quiet space</strong><br>
+      <strong>Before you begin, please ensure you are in a quiet space</strong><br>
       <a href="https://docs.google.com/forms/d/e/your-google-form-id/viewform" target="_blank" 
          style="font-size:18px; color:blue; text-decoration:underline; display:inline-block; margin-top:10px;">
         If at any point you wish to stop participating, please exit this page and your data will not be recorded.
@@ -66,40 +64,59 @@ const instructions = {
   type: jsPsychHtmlKeyboardResponse,
   stimulus: `
     <p>You will be shown faces and voices in alternating order.</p>
-    <p>After each one, you will be asked to answer four questions about your impressions of the stimuli using a slider.</p>
+    <p>After each one, you will be asked to answer four questions about your impressions using a slider.</p>
     <p>Press SPACE to begin.</p>
   `,
   choices: [' ']
 };
 
+// Initialize timeline with consent and instructions
 let timeline = [consent, instructions];
+
+// Collect image and audio trials
+let imageTrials = [];
+let audioTrials = [];
 
 imageAudioFlow.forEach(groupSet => {
   groupSet.images.forEach(imgID => {
-    for (let v = 1; v <= 6; v++) {
+    const shuffledVariants = jsPsych.randomization.shuffle([1, 2, 3, 4, 5, 6]);
+    shuffledVariants.forEach(v => {
       const facePath = `all_images/${group}_face${imgID.toString().padStart(2, "0")}_${v}.png`;
-      timeline.push(
+      imageTrials.push(
         makeSlider("image", facePath, "1. How dominant do you think this person is on a scale of 1-7, with 1 being not at all and 7 being very?", 1, 7, 1),
         makeSlider("image", facePath, "2. How trustworthy do you think this person is on a scale of 1-7, with 1 being not at all and 7 being very?", 1, 7, 1),
         makeSlider("image", facePath, "3. How honest do you think this person is on a scale of 1-7, with 1 being not at all and 7 being very?", 1, 7, 1),
         makeSlider("image", facePath, "4. How tall do you think this person is from 5'5 to 6'5?", 1, 13, 1)
       );
-    }
+    });
   });
 
   groupSet.audios.forEach(audioID => {
-    for (let p = 1; p <= 3; p++) {
+    const shuffledPitches = jsPsych.randomization.shuffle([1, 2, 3]);
+    shuffledPitches.forEach(p => {
       const audioPath = `all_audios/${group}_voice${audioID.toString().padStart(2, "0")}_pitch${p}.wav`;
-      timeline.push(
+      audioTrials.push(
         makeSlider("audio", audioPath, "1. How dominant do you think this person is on a scale of 1-7, with 1 being not at all and 7 being very?", 1, 7, 1),
         makeSlider("audio", audioPath, "2. How trustworthy do you think this person is on a scale of 1-7, with 1 being not at all and 7 being very?", 1, 7, 1),
         makeSlider("audio", audioPath, "3. How honest do you think this person is on a scale of 1-7, with 1 being not at all and 7 being very?", 1, 7, 1),
         makeSlider("audio", audioPath, "4. How tall do you think this person is from 5'5 to 6'5?", 1, 13, 1)
       );
-    }
+    });
   });
 });
 
+// Interleave image and audio trials
+const combinedTrials = [];
+const maxLength = Math.max(imageTrials.length, audioTrials.length);
+for (let i = 0; i < maxLength; i++) {
+  if (i < imageTrials.length) combinedTrials.push(imageTrials[i]);
+  if (i < audioTrials.length) combinedTrials.push(audioTrials[i]);
+}
+
+// Add randomized, alternating trials to timeline
+timeline = timeline.concat(combinedTrials);
+
+// Add closing message
 timeline.push({
   type: jsPsychHtmlKeyboardResponse,
   stimulus: `
