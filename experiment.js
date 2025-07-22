@@ -45,13 +45,13 @@ const makeSlider = (stimulusType, stimulusPath, question, min, max, step, labels
 const consent = {
   type: jsPsychHtmlKeyboardResponse,
   stimulus: `
-    <h2>Consent Form</h2>
-    <p>By participating, you agree to take part in this study.</p>
+    <h2>Welcome to the experiment</h2>
+    <p>In this study, you will complete a series of tasks involving images and audio clips.</p>
     <p style="margin-top: 20px;">
-      <strong>Welcome to the study</strong><br>
+      <strong>Before you being please ensure you are in a quiet space</strong><br>
       <a href="https://docs.google.com/forms/d/e/your-google-form-id/viewform" target="_blank" 
          style="font-size:18px; color:blue; text-decoration:underline; display:inline-block; margin-top:10px;">
-        If at any point you wish to stop participating, please exit the study.
+        If at any point you wish to stop participating, please exit this page and your data will not be recorded.
       </a>
     </p>
     <p style="margin-top: 40px;">Press SPACE to continue.</p>
