@@ -51,89 +51,117 @@ const instructions = {
 
 let timeline = [consent, instructions];
 
-// === Helper Functions ===
+const heightLabels = `
+  <div style='display: flex; justify-content: space-between; font-size: 12px;'>
+    <span>5'5"</span><span>5'6"</span><span>5'7"</span><span>5'8"</span><span>5'9"</span>
+    <span>5'10"</span><span>5'11"</span><span>6'0"</span><span>6'1"</span><span>6'2"</span>
+    <span>6'3"</span><span>6'4"</span><span>6'5"</span>
+  </div>`;
 
-const makeImageBlock = (facePath) => {
-  return {
-    timeline: [
-      {
-        type: jsPsychSurveyHtmlForm,
-        preamble: `<img src="${facePath}" height="300"><br><p><b>1. How dominant do you think this person is?</b></p>`,
-        html: `<input type='range' name='response' min='1' max='7' step='1' style='width: 100%;'><br>
-               <div style='display: flex; justify-content: space-between;'><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span></div>`,
-        data: { question: "dominant", stimulus: facePath, modality: "image" },
-        on_finish: logToSheet
-      },
-      {
-        type: jsPsychSurveyHtmlForm,
-        preamble: `<img src="${facePath}" height="300"><br><p><b>2. How trustworthy do you think this person is?</b></p>`,
-        html: `<input type='range' name='response' min='1' max='7' step='1' style='width: 100%;'><br>
-               <div style='display: flex; justify-content: space-between;'><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span></div>`,
-        data: { question: "trustworthy", stimulus: facePath, modality: "image" },
-        on_finish: logToSheet
-      },
-      {
-        type: jsPsychSurveyHtmlForm,
-        preamble: `<img src="${facePath}" height="300"><br><p><b>3. How honest do you think this person is?</b></p>`,
-        html: `<input type='range' name='response' min='1' max='7' step='1' style='width: 100%;'><br>
-               <div style='display: flex; justify-content: space-between;'><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span></div>`,
-        data: { question: "honest", stimulus: facePath, modality: "image" },
-        on_finish: logToSheet
-      },
-      {
-        type: jsPsychSurveyHtmlForm,
-        preamble: `<img src="${facePath}" height="300"><br><p><b>4. How tall do you think this person is?</b> (1 = 5'5", 13 = 6'5")</p>`,
-        html: `<input type='range' name='response' min='1' max='13' step='1' style='width: 100%;'><br>
-               <div style='display: flex; justify-content: space-between;'><span>5'5"</span><span></span><span></span><span>6'0"</span><span></span><span></span><span>6'5"</span></div>`,
-        data: { question: "tall", stimulus: facePath, modality: "image" },
-        on_finish: logToSheet
-      }
-    ]
-  };
-};
+// === IMAGE BLOCK ===
+const makeImageBlock = (facePath) => ({
+  timeline: [
+    {
+      type: jsPsychSurveyHtmlForm,
+      preamble: `<img src="${facePath}" height="300"><br>
+        <p><b>1. How dominant do you think this person is?</b><br>
+        <i>Please use your mouse and the slider below to make your selection.</i></p>`,
+      html: `<input type='range' name='response' min='1' max='7' step='1' style='width: 100%;'><br>
+             <div style='display: flex; justify-content: space-between;'>
+               <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
+             </div>`,
+      data: { question: "dominant", stimulus: facePath, modality: "image" },
+      on_finish: logToSheet
+    },
+    {
+      type: jsPsychSurveyHtmlForm,
+      preamble: `<img src="${facePath}" height="300"><br>
+        <p><b>2. How trustworthy do you think this person is?</b><br>
+        <i>Please use your mouse and the slider below to make your selection.</i></p>`,
+      html: `<input type='range' name='response' min='1' max='7' step='1' style='width: 100%;'><br>
+             <div style='display: flex; justify-content: space-between;'>
+               <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
+             </div>`,
+      data: { question: "trustworthy", stimulus: facePath, modality: "image" },
+      on_finish: logToSheet
+    },
+    {
+      type: jsPsychSurveyHtmlForm,
+      preamble: `<img src="${facePath}" height="300"><br>
+        <p><b>3. How honest do you think this person is?</b><br>
+        <i>Please use your mouse and the slider below to make your selection.</i></p>`,
+      html: `<input type='range' name='response' min='1' max='7' step='1' style='width: 100%;'><br>
+             <div style='display: flex; justify-content: space-between;'>
+               <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
+             </div>`,
+      data: { question: "honest", stimulus: facePath, modality: "image" },
+      on_finish: logToSheet
+    },
+    {
+      type: jsPsychSurveyHtmlForm,
+      preamble: `<img src="${facePath}" height="300"><br>
+        <p><b>4. How tall do you think this person is?</b><br>(1 = 5'5", 13 = 6'5")<br>
+        <i>Please use your mouse and the slider below to make your selection.</i></p>`,
+      html: `<input type='range' name='response' min='1' max='13' step='1' style='width: 100%;'><br>${heightLabels}`,
+      data: { question: "tall", stimulus: facePath, modality: "image" },
+      on_finish: logToSheet
+    }
+  ]
+});
 
-const makeAudioBlock = (audioPath) => {
-  return {
-    timeline: [
-      {
-        type: jsPsychSurveyHtmlForm,
-        preamble: `<audio controls autoplay><source src="${audioPath}" type="audio/wav"></audio><br><p><b>1. How dominant do you think this person is?</b></p>`,
-        html: `<input type='range' name='response' min='1' max='7' step='1' style='width: 100%;'><br>
-               <div style='display: flex; justify-content: space-between;'><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span></div>`,
-        data: { question: "dominant", stimulus: audioPath, modality: "audio" },
-        on_finish: logToSheet
-      },
-      {
-        type: jsPsychSurveyHtmlForm,
-        preamble: `<audio controls><source src="${audioPath}" type="audio/wav"></audio><br><p><b>2. How trustworthy do you think this person is?</b></p>`,
-        html: `<input type='range' name='response' min='1' max='7' step='1' style='width: 100%;'><br>
-               <div style='display: flex; justify-content: space-between;'><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span></div>`,
-        data: { question: "trustworthy", stimulus: audioPath, modality: "audio" },
-        on_finish: logToSheet
-      },
-      {
-        type: jsPsychSurveyHtmlForm,
-        preamble: `<audio controls><source src="${audioPath}" type="audio/wav"></audio><br><p><b>3. How honest do you think this person is?</b></p>`,
-        html: `<input type='range' name='response' min='1' max='7' step='1' style='width: 100%;'><br>
-               <div style='display: flex; justify-content: space-between;'><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span></div>`,
-        data: { question: "honest", stimulus: audioPath, modality: "audio" },
-        on_finish: logToSheet
-      },
-      {
-        type: jsPsychSurveyHtmlForm,
-        preamble: `<audio controls><source src="${audioPath}" type="audio/wav"></audio><br><p><b>4. How tall do you think this person is?</b> (1 = 5'5", 13 = 6'5")</p>`,
-        html: `<input type='range' name='response' min='1' max='13' step='1' style='width: 100%;'><br>
-               <div style='display: flex; justify-content: space-between;'><span>5'5"</span><span></span><span></span><span>6'0"</span><span></span><span></span><span>6'5"</span></div>`,
-        data: { question: "tall", stimulus: audioPath, modality: "audio" },
-        on_finish: logToSheet
-      }
-    ]
-  };
-};
+// === AUDIO BLOCK ===
+const makeAudioBlock = (audioPath) => ({
+  timeline: [
+    {
+      type: jsPsychSurveyHtmlForm,
+      preamble: `<audio controls autoplay><source src="${audioPath}" type="audio/wav"></audio><br>
+        <p><b>1. How dominant do you think this person is?</b><br>
+        <i>Please use your mouse and the slider below to make your selection.</i></p>`,
+      html: `<input type='range' name='response' min='1' max='7' step='1' style='width: 100%;'><br>
+             <div style='display: flex; justify-content: space-between;'>
+               <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
+             </div>`,
+      data: { question: "dominant", stimulus: audioPath, modality: "audio" },
+      on_finish: logToSheet
+    },
+    {
+      type: jsPsychSurveyHtmlForm,
+      preamble: `<audio controls><source src="${audioPath}" type="audio/wav"></audio><br>
+        <p><b>2. How trustworthy do you think this person is?</b><br>
+        <i>Please use your mouse and the slider below to make your selection.</i></p>`,
+      html: `<input type='range' name='response' min='1' max='7' step='1' style='width: 100%;'><br>
+             <div style='display: flex; justify-content: space-between;'>
+               <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
+             </div>`,
+      data: { question: "trustworthy", stimulus: audioPath, modality: "audio" },
+      on_finish: logToSheet
+    },
+    {
+      type: jsPsychSurveyHtmlForm,
+      preamble: `<audio controls><source src="${audioPath}" type="audio/wav"></audio><br>
+        <p><b>3. How honest do you think this person is?</b><br>
+        <i>Please use your mouse and the slider below to make your selection.</i></p>`,
+      html: `<input type='range' name='response' min='1' max='7' step='1' style='width: 100%;'><br>
+             <div style='display: flex; justify-content: space-between;'>
+               <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
+             </div>`,
+      data: { question: "honest", stimulus: audioPath, modality: "audio" },
+      on_finish: logToSheet
+    },
+    {
+      type: jsPsychSurveyHtmlForm,
+      preamble: `<audio controls><source src="${audioPath}" type="audio/wav"></audio><br>
+        <p><b>4. How tall do you think this person is?</b><br>(1 = 5'5", 13 = 6'5")<br>
+        <i>Please use your mouse and the slider below to make your selection.</i></p>`,
+      html: `<input type='range' name='response' min='1' max='13' step='1' style='width: 100%;'><br>${heightLabels}`,
+      data: { question: "tall", stimulus: audioPath, modality: "audio" },
+      on_finish: logToSheet
+    }
+  ]
+});
 
-// === Generate All Image and Audio Trials ===
-let imageBlocks = [];
-let audioBlocks = [];
+// === Build & Interleave ===
+let imageBlocks = [], audioBlocks = [];
 
 imageAudioFlow.forEach(set => {
   set.images.forEach(imgID => {
@@ -143,7 +171,6 @@ imageAudioFlow.forEach(set => {
       imageBlocks.push(makeImageBlock(path));
     });
   });
-
   set.audios.forEach(audioID => {
     const pitches = jsPsych.randomization.shuffle([1, 2, 3]);
     pitches.forEach(p => {
@@ -153,7 +180,6 @@ imageAudioFlow.forEach(set => {
   });
 });
 
-// === Alternate Image and Audio Blocks ===
 let combined = [];
 const max = Math.max(imageBlocks.length, audioBlocks.length);
 for (let i = 0; i < max; i++) {
@@ -163,7 +189,7 @@ for (let i = 0; i < max; i++) {
 
 timeline = timeline.concat(combined);
 
-// === Final Screen ===
+// === Final Message ===
 timeline.push({
   type: jsPsychHtmlKeyboardResponse,
   stimulus: `
