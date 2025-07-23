@@ -23,15 +23,15 @@ const consent = {
   type: jsPsychHtmlKeyboardResponse,
   stimulus: `
     <h2>Welcome to the experiment</h2>
-    <p>In this study, you will complete tasks involving faces and voices.</p>
+    <p>In this study, you will complete a series of tasks involving <strong>images</strong> and <strong>audio clips</strong>.</p>
     <p style="margin-top: 20px;">
-      <strong>Please ensure you are in a quiet space.</strong><br>
+      <strong> Before you begin please ensure you are in a quiet space.</strong><br>
       <a href="https://docs.google.com/forms/d/e/your-google-form-id/viewform" target="_blank" 
          style="font-size:18px; color:blue; text-decoration:underline; display:inline-block; margin-top:10px;">
-        If you wish to stop at any point, simply close this page.
+        If you wish to stop at any point, simply close this page and your data will not be recorded.
       </a>
     </p>
-    <p style="margin-top: 40px;">Press SPACE to continue, or 0 to opt out.</p>
+    <p style="margin-top: 40px;">Press SPACE to continue.</p>
   `,
   choices: [' ', '0'],
   on_finish: data => {
@@ -43,8 +43,8 @@ const instructions = {
   type: jsPsychHtmlKeyboardResponse,
   stimulus: `
     <p>You will be shown a face or a voice in alternating order.</p>
-    <p>After each, you will answer four questions one at a time using sliders.</p>
-    <p>Press SPACE to begin.</p>
+    <p>After each stimuli is presented, you will answer four questions one at a time using your mouse and a slider on the screen.</p>
+    <p>Press SPACE to begin the experiment.</p>
   `,
   choices: [' ']
 };
