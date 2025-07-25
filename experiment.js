@@ -4,6 +4,7 @@ const jsPsych = initJsPsych({
 });
 
 const group = jsPsych.randomization.sampleWithoutReplacement(["male", "female"], 1)[0];
+const participantID = jsPsych.randomization.randomID(8); // Generates something like "a1b2c3d4"
 
 const imageAudioFlow = [
   { images: [1, 2], audios: [1, 2, 3, 4] },
@@ -14,7 +15,8 @@ const imageAudioFlow = [
 ];
 
 const logToSheet = trialData => {
-  fetch("https://script.google.com/macros/s/AKfycbwYsAlfJ-iaUD5vU93CravpfjDrUwhNtq0ELbQLb8wzLOXfMi0QFKMmkZpsja9lNiYJ3w/exec", {
+    trialData.ParticipantID = participantID;
+  fetch("https://script.google.com/macros/s/AKfycbwke6IYBB4bjpdjgiiEK8m4K-KsYxXVstdy_e7iSWFIQA4azTPg5L7UMGVJAnriXBQ9uw/exec", {
     method: "POST",
     mode: "no-cors",
     headers: { "Content-Type": "application/json" },
