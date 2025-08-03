@@ -4,7 +4,6 @@ const jsPsych = initJsPsych({
 });
 
 const group = jsPsych.randomization.sampleWithoutReplacement(["male", "female"], 1)[0];
-const participantID = jsPsych.randomization.randomID(8); // Generates something like "a1b2c3d4"
 
 const imageAudioFlow = [
   { images: [1, 2], audios: [1, 2, 3, 4] },
@@ -14,21 +13,18 @@ const imageAudioFlow = [
   { images: [9, 10], audios: [17, 18, 19, 20] }
 ];
 
-const logToSheet = trialData => {
-    trialData.ParticipantID = participantID;
-  fetch("https://script.google.com/macros/s/AKfycbwke6IYBB4bjpdjgiiEK8m4K-KsYxXVstdy_e7iSWFIQA4azTPg5L7UMGVJAnriXBQ9uw/exec", {
-    method: "POST",
-    mode: "no-cors",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify([trialData])
-  });
-};
+const participantID = jsPsych.data.getURLVariable("id") || Math.floor(Math.random() * 100000);
+jsPsych.data.addProperties({ participantID });
 
+const logToFirebase = trialData => {
+  const timestamp = Date.now();
+  firebase.database().ref(`participants/${participantID}/trials/${timestamp}`).set(trialData);
+};
 
 const general_instructions = {
   type: jsPsychHtmlKeyboardResponse,
   stimulus: `
-    <p>Welcome to the experiment. This experiment consists of <strong>two parts</strong>.</p>
+    <p>Welcome to the experiment. This experiment consists of <strong>two parts</strong> and will take approximately <strong>45 minutes</strong> to complete.</p>
     <p>Please make sure you are in a quiet space while doing the experiment.</p>
     <p>If you wish to stop at any point, simply close this page and your data will not be recorded.</p>
     <p style="margin-top: 40px;">Press SPACE to continue.</p>
@@ -53,7 +49,7 @@ const instructions_part2 = {
   stimulus: `
     <h2>Part 2 Instructions</h2>
     <p>In Part 2, you'll read about four companies looking to hire an employee.</p>
-    <p>Your job will be to review each applicant's profile and rank the applicants in terms of their fit for the role.</p>
+    <p>Your job will be to review each applicant's profile, then rate how likely you are to shortlist each applicant for an interview and rank the applicants in terms of their fit for the role.</p>
     <p>More details will be provided when that section begins.</p>
     <p style="margin-top: 40px;">Press SPACE to view examples from Part 1.</p>
   `,
@@ -125,7 +121,7 @@ const makeImageBlock = (facePath) => ({
                <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
              </div>`,
       data: { question: "dominant", stimulus: facePath, modality: "image" },
-      on_finish: logToSheet
+      on_finish: logToFirebase
     },
     {
       type: jsPsychSurveyHtmlForm,
@@ -137,7 +133,7 @@ const makeImageBlock = (facePath) => ({
                <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
              </div>`,
       data: { question: "trustworthy", stimulus: facePath, modality: "image" },
-      on_finish: logToSheet
+      on_finish: logToFirebase
     },
     {
       type: jsPsychSurveyHtmlForm,
@@ -149,7 +145,7 @@ const makeImageBlock = (facePath) => ({
                <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
              </div>`,
       data: { question: "honest", stimulus: facePath, modality: "image" },
-      on_finish: logToSheet
+      on_finish: logToFirebase
     },
     {
       type: jsPsychSurveyHtmlForm,
@@ -161,7 +157,7 @@ const makeImageBlock = (facePath) => ({
                <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
              </div>`,
       data: { question: "attractive", stimulus: facePath, modality: "image" },
-      on_finish: logToSheet
+      on_finish: logToFirebase
     },
     {
       type: jsPsychSurveyHtmlForm,
@@ -170,7 +166,7 @@ const makeImageBlock = (facePath) => ({
         <i>Please use your mouse and the slider below to make your selection.</i></p>`,
       html: `<input type='range' name='response' min='1' max='13' step='1' style='width: 100%;'><br>${heightLabels}`,
       data: { question: "tall", stimulus: facePath, modality: "image" },
-      on_finish: logToSheet
+      on_finish: logToFirebase
     }
   ]
 });
@@ -188,7 +184,7 @@ const makeAudioBlock = (audioPath) => ({
                <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
              </div>`,
       data: { question: "dominant", stimulus: audioPath, modality: "audio" },
-      on_finish: logToSheet
+      on_finish: logToFirebase
     },
     {
       type: jsPsychSurveyHtmlForm,
@@ -200,7 +196,7 @@ const makeAudioBlock = (audioPath) => ({
                <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
              </div>`,
       data: { question: "trustworthy", stimulus: audioPath, modality: "audio" },
-      on_finish: logToSheet
+      on_finish: logToFirebase
     },
     {
       type: jsPsychSurveyHtmlForm,
@@ -212,7 +208,7 @@ const makeAudioBlock = (audioPath) => ({
                <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
              </div>`,
       data: { question: "honest", stimulus: audioPath, modality: "audio" },
-      on_finish: logToSheet
+      on_finish: logToFirebase
     },
     {
       type: jsPsychSurveyHtmlForm,
@@ -224,7 +220,7 @@ const makeAudioBlock = (audioPath) => ({
                <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
              </div>`,
       data: { question: "attractive", stimulus: audioPath, modality: "audio" },
-      on_finish: logToSheet
+      on_finish: logToFirebase
     },
     {
       type: jsPsychSurveyHtmlForm,
@@ -233,22 +229,22 @@ const makeAudioBlock = (audioPath) => ({
         <i>Please use your mouse and the slider below to make your selection.</i></p>`,
       html: `<input type='range' name='response' min='1' max='13' step='1' style='width: 100%;'><br>${heightLabels}`,
       data: { question: "tall", stimulus: audioPath, modality: "audio" },
-      on_finish: logToSheet
+      on_finish: logToFirebase
     },
 
     {
-      type: jsPsychSurveyHtmlForm,
-      preamble: `<audio controls><source src="${audioPath}" type="audio/wav"></audio><br>
-        <p><b> Does this voice sound human to you?</b><br>
-        <i>Please use your mouse and the slider below to select 0 (No) or 1 (Yes).</i></p>`,
-      html: `
-        <input type='range' name='response' min='0' max='1' step='1' style='width: 100%;'><br>
-        <div style='display: flex; justify-content: space-between;'>
-          <span>No</span><span style="margin-left:auto;">Yes</span>
-        </div>
-      `,
-      data: { question: "human_voice", stimulus: audioPath, modality: "audio" },
-      on_finish: logToSheet
+     type: jsPsychSurveyHtmlForm,
+     preamble: `<audio controls><source src="${audioPath}" type="audio/wav"></audio><br>
+       <p><b>Does this voice sound more human or robotic to you?</b><br>
+       <i>Please use your mouse and the slider below to indicate your response.</i></p>`,
+     html: `
+       <input type='range' name='response' min='0' max='1' step='1' style='width: 100%;'><br>
+       <div style='display: flex; justify-content: space-between;'>
+         <span>Human</span><span style="margin-left:auto;">Robotic</span>
+       </div>
+     `,
+     data: { question: "human_voice", stimulus: audioPath, modality: "audio" },
+     on_finish: logToFirebase
     }
   ]
 });
@@ -285,24 +281,24 @@ for (let i = 0; i < max; i++) {
   if (i < audioBlocks.length) combined.push(audioBlocks[i]);
 }
 
-timeline = timeline.concat(combined);
+// timeline = timeline.concat(combined);
 
-timeline.push({
-  type: jsPsychHtmlKeyboardResponse,
-  stimulus: `
-    <h2>End of Part 1</h2>
-    <p>You have completed Part 1 of the experiment.</p>
-    <p>Take a short break if needed. Press <strong>SPACE</strong> to continue to Part 2 instructions.</p>
-  `,
-  choices: [' ']
-});
+// timeline.push({
+//   type: jsPsychHtmlKeyboardResponse,
+//   stimulus: `
+//     <h2>End of Part 1</h2>
+//     <p>You have completed Part 1 of the experiment.</p>
+//     <p>Take a short break if needed. Press <strong>SPACE</strong> to continue to Part 2 instructions.</p>
+//   `,
+//   choices: [' ']
+// });
 
 const instructions_exppart2 = {
   type: jsPsychHtmlKeyboardResponse,
   stimulus: `
     <h2>Part 2 Instructions</h2>
     <p>In this next part, you will be presented with four different job postings from companies looking to hire an employee.</p>
-    <p>Each job posting includes six different applications from individuals who have applied for the role. Your task is to read through each applicant profile and rank them based on how well you think they fit the position.</p> 
+    <p>Each job posting includes six different applications from individuals who have applied for the role. Your task is to read through each applicant profile, then rate how likely you are to shortlist each applicant for an interview and rank them based on how well you think they fit the position.</p> 
     <p>Please continue to respond as thoughtfully and accurately as possible.</p>
     <p>Press <strong>SPACE</strong> to begin Part 2.</p>
   `,
@@ -315,7 +311,6 @@ const ceoScenario1 = {
   jobDescription: `
     <h2>Job Posting: Chief Executive Officer (CEO)</h2>
     <p><strong>Location:</strong> Toronto, ON</p>
-    <p><strong>Start Date:</strong> As soon as possible</p>
     <p><strong>About the Company:</strong> NovaLink is a Canadian tech firm, with a team of 5000 employees, that builds smart software to help companies manage their supply chains. We’ve grown across North America and are now preparing to expand into Europe. At the same time, we’re dealing with a hostile takeover attempt from a U.S. competitor. We want to remain independent and grow internationally, without losing our focus or team stability. We are looking for a new CEO to help navigate these challenges and opportunities.</p>
   `,
   candidates: [
@@ -352,7 +347,6 @@ const ceoScenario2 = {
   jobDescription: `
     <h2>Job Posting: Chief Executive Officer (CEO)</h2>
     <p><strong>Location:</strong> Vancouver, BC</p>
-    <p><strong>Start Date:</strong> Flexible</p>
     <p><strong>About the Company:</strong> GreenPath develops software to help other companies track and reduce their environmental impact in Canada and Europe. We’ve grown quickly to a team of 500, but that growth has created new pressures. We’ve fallen behind in updating our tools  and platforms to keep up with new climate regulations across multiple countries.  Furthermore, our switch back from remote to in-office mode after the COVID lockdowns has left some staff dissatisfied and unheard. We now want to consolidate and focus on doing two things better: staying ahead of environmental standards and making GreenPath a more connected and desirable place to work. We are looking for a new CEO to help us achieve these goals.</p>
   `,
   candidates: [
@@ -389,7 +383,6 @@ const eceScenario1 = {
   jobDescription: `
     <h2>Job Posting: Early Childhood Educator (ECE)</h2>
     <p><strong>Location:</strong> Toronto, ON</p>
-    <p><strong>Start Date:</strong> Immediate</p>
     <p><strong>About the Company:</strong> Little Steps Early Learning Centre is a large, multi-centre daycare located in various parts of the Greater Toronto Area. Our downtown Toronto centre currently serves 45 children with a team of 8 dedicated staff members. Recently, the centre has been facing increasing challenges related to (i) staff adopting to new curriculum regulations and (ii) classroom management and disruptive behaviour. As a result, the centre is seeking an Early Childhood Educator (ECE) who can provide a firm lead to staff and navigate both staff and classroom conflict effectively.</p>
   `,
   candidates: [
@@ -426,7 +419,6 @@ const eceScenario2 = {
   jobDescription: `
     <h2>Job Posting: Early Childhood Educator (ECE)</h2>
     <p><strong>Location:</strong> Vancouver, BC</p>
-    <p><strong>Start Date:</strong> Flexible</p>
     <p><strong>About the Company:</strong> Early Minds Academy is a large, multi-centre daycare located in various parts of the Greater Vancouver Area. Our downtown Vancouver centre currently serves 45 children with a team of 8 dedicated staff members. At this time, the centre is in the process of enhancing its program to align more closely with child-centered approaches that prioritize emotional development and interpersonal learning. As a result, the centre is seeking an Early Childhood Educator (ECE) who is warm, nurturing, and emotionally attuned. The ideal candidate will foster close relationships with children and families and have a strong passion for learning.</p>
   `,
   candidates: [
@@ -457,34 +449,126 @@ const eceScenario2 = {
   ]
 };
 
-// Function to create the ranking trial for each scenario
-function createRankingTrial(scenario) {
-  let candidatesHtml = scenario.candidates.map((c, i) => 
-    `<strong>${i + 1}. ${c.name}</strong><br>${c.description}<br><br>`
-  ).join("");
+// Function to create the rating and ranking trial for each scenario
+function createTrialWithRatingsAndRanking(scenario) {
+  const candidateCount = scenario.candidates.length;
 
-  let inputsHtml = scenario.candidates.map(c => 
-    `<label for="rank_${c.name.replace(/\s+/g, '')}">${c.name}:</label>
-     <input type="number" id="rank_${c.name.replace(/\s+/g, '')}" name="${c.name.replace(/\s+/g, '')}" min="1" max="${scenario.candidates.length}" required><br><br>`
-  ).join("");
+  // Candidate profiles + Likert rating blocks
+  const candidateSections = scenario.candidates.map((c, i) => {
+    const id = c.name.replace(/\s+/g, '');
+    return `
+      <div style="margin-bottom: 30px;">
+        <strong>${i + 1}. ${c.name}</strong><br>
+        <p>${c.description}</p>
+        <label for="rating_${id}"><strong>How likely are you to shortlist this applicant for an interview? (1 = Very Unlikely, 7 = Very Likely)</strong></label><br>
+        <input 
+          type="range" 
+          id="rating_${id}" 
+          name="rating_${id}" 
+          min="1" 
+          max="7" 
+          step="1" 
+          style="width: 60%; display: block; margin: 0 auto;"
+        >
+        <div style="display: flex; justify-content: space-between; padding: 0 4px; font-weight: bold; width: 60%; margin: 0 auto;">
+          <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  // Ranking input section
+  const rankingInputs = scenario.candidates.map(c => {
+    const id = c.name.replace(/\s+/g, '');
+    return `
+      <label for="rank_${id}">${c.name}:</label>
+      <input type="number" id="rank_${id}" name="rank_${id}" min="1" max="${candidateCount}" required><br><br>
+    `;
+  }).join("");
+
+  const htmlBlock = `
+    ${candidateSections}
+    <hr>
+    <p><strong>Ranking Task:</strong> Please rank the applicants from 1 (best fit) to ${candidateCount} (least fit). Please assign a unique rank number to each applicant.</p>
+    ${rankingInputs}
+    <button id="customSubmit" type="button">Submit</button>
+    <div id="errorMsg" style="color:red; font-weight:bold;"></div>
+  `;
+
+  // Then in your trial object:
 
   return {
     type: jsPsychSurveyHtmlForm,
-    preamble: scenario.jobDescription + "<hr><h3>Candidates:</h3>" + candidatesHtml + `<hr><p><strong>Ranking Task:</strong> Please rank the candidates from 1 (best fit) to ${scenario.candidates.length} (least fit).</p>`,
-    html: inputsHtml,
-    button_label: "Submit",
+    preamble: scenario.jobDescription + "<hr><h3>Applicants:</h3>",
+    html: htmlBlock,
     data: scenario.data,
-    on_finish: logToSheet
+    on_load: function() {
+
+        // 1. Try removing the button immediately (in case it’s already there)
+        const tryRemoveButton = () => {
+            const defaultBtn = document.querySelector('.jspsych-btn');
+            if (defaultBtn) defaultBtn.remove();
+        };
+
+        tryRemoveButton(); // run immediately
+
+        // 2. Then observe future mutations in case button is added late
+        const observer = new MutationObserver((mutations, obs) => {
+            tryRemoveButton();
+        });
+
+        observer.observe(document.body, { childList: true, subtree: true });
+
+        // 3. Form logic for validation
+        const btn = document.getElementById("customSubmit");
+        const form = document.querySelector("form");
+        const errorMsg = document.getElementById("errorMsg");
+
+        btn.addEventListener("click", () => {
+            const formData = new FormData(form);
+            const ranks = [];
+
+            for (let [key, val] of formData.entries()) {
+                if (key.startsWith("rank_")) {
+                    ranks.push(Number(val));
+                }
+            }
+
+            const uniqueRanks = new Set(ranks);
+            const expected = [...Array(candidateCount)].map((_, i) => i + 1);
+
+            if (ranks.some(val => isNaN(val))) {
+                errorMsg.textContent = "Please enter a valid numeric rank for each candidate.";
+                return;
+            }
+
+            if (uniqueRanks.size !== ranks.length) {
+                errorMsg.textContent = "Each candidate must have a unique rank. Please check your responses.";
+                return;
+            }
+
+            if (!expected.every(num => ranks.includes(num))) {
+                errorMsg.textContent = `Please use each number from 1 to ${candidateCount} exactly once.`;
+                return;
+            }
+
+            // Validation passed: clear error and finish trial manually
+            errorMsg.textContent = "";
+            observer.disconnect(); // stop watching for button
+            jsPsych.finishTrial({ ...scenario.data, responses: Object.fromEntries(formData.entries()) });
+        });
+    },
+    on_finish: logToFirebase,
   };
 }
 
 const allScenarios = [ceoScenario1, ceoScenario2, eceScenario1, eceScenario2];
 const randomizedScenarios = jsPsych.randomization.shuffle(allScenarios);
-const allRankingTrials = randomizedScenarios.map(createRankingTrial);
+const allCombinedTrials = randomizedScenarios.map(createTrialWithRatingsAndRanking);
 
 // Add your instructions and then these trials to timeline
 timeline.push(instructions_exppart2);
-timeline = timeline.concat(allRankingTrials);
+timeline = timeline.concat(allCombinedTrials);
 
 // === Final Message ===
 timeline.push({
