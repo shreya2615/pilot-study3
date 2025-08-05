@@ -24,19 +24,17 @@ jsPsych.data.addProperties({ participantID });
 
 
 const logToFirebase = (trialData) => {
-  const lastTrial = jsPsych.data.get().last(1).values()[0];
   const participantID = jsPsych.data.get().values()[0]?.participantID || "unknown";
 
   const entry = {
     participantID,
     group,
     modality: trialData.modality,
-    block: trialData.block,
-    leftStimulus: trialData.leftStimulus || "",
-    rightStimulus: trialData.rightStimulus || "",
+    block: trialData.block || "",
+    stimulus: trialData.stimulus || trialData.leftStimulus || trialData.rightStimulus || "",
     question: trialData.question || "",
-    response: lastTrial.response || "",
-    rt: lastTrial.rt || "",
+    response: trialData.response ?? "",  // null-safe
+    rt: trialData.rt ?? "",              // null-safe
     timestamp: Date.now()
   };
 
@@ -346,7 +344,6 @@ const randomizedBlockOrder = jsPsych.randomization.shuffle([
   { name: "C", block: blockC }
 ]);
 
-// End of block label
 function createEndOfBlockScreen(blockLabel) {
   return {
     type: jsPsychHtmlKeyboardResponse,
@@ -357,7 +354,27 @@ function createEndOfBlockScreen(blockLabel) {
         <p>Press SPACE to continue.</p>
       </div>
     `,
-    choices: [' ']
+    choices: [' '],
+    data: { 
+      question: "break_screen", 
+      modality: "break", 
+      block: blockLabel 
+    },
+    on_finish: function(data) {
+      const participantID = jsPsych.data.get().values()[0]?.participantID || "unknown";
+      const entry = {
+        participantID,
+        group,
+        modality: "break",
+        block: data.block,
+        question: "break_screen",
+        stimulus: "",
+        response: "",
+        rt: data.rt,
+        timestamp: Date.now()
+      };
+      database.ref(`participants/${participantID}/trials`).push(entry);
+    }
   };
 }
 
