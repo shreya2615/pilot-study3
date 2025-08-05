@@ -31,7 +31,7 @@ const logToFirebase = (trialData) => {
     group,
     modality: trialData.modality,
     block: trialData.block || "",
-    stimulus: trialData.stimulus || trialData.leftStimulus || trialData.rightStimulus || "",
+    stimulus: trialData.stimulus || "",
     question: trialData.question || "",
     response: trialData.response ?? "",  // null-safe
     rt: trialData.rt ?? "",              // null-safe
@@ -128,7 +128,9 @@ const makeImageBlock = (facePath) => ({
                <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
              </div>`,
       data: { question: "dominant", stimulus: facePath, modality: "image" },
-      on_finish: logToFirebase
+      on_finish: function(data) {
+        logToFirebase(data);
+}
     },
     {
       type: jsPsychSurveyHtmlForm,
@@ -140,7 +142,9 @@ const makeImageBlock = (facePath) => ({
                <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
              </div>`,
       data: { question: "trustworthy", stimulus: facePath, modality: "image" },
-      on_finish: logToFirebase
+      on_finish: function(data) {
+        logToFirebase(data);
+}
     },
     {
       type: jsPsychSurveyHtmlForm,
@@ -152,7 +156,9 @@ const makeImageBlock = (facePath) => ({
                <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
              </div>`,
       data: { question: "honest", stimulus: facePath, modality: "image" },
-      on_finish: logToFirebase
+      on_finish: function(data) {
+        logToFirebase(data);
+}
     },
     {
       type: jsPsychSurveyHtmlForm,
@@ -164,7 +170,9 @@ const makeImageBlock = (facePath) => ({
                <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
              </div>`,
       data: { question: "attractive", stimulus: facePath, modality: "image" },
-      on_finish: logToFirebase
+      on_finish: function(data) {
+        logToFirebase(data);
+}
     },
     {
       type: jsPsychSurveyHtmlForm,
@@ -173,7 +181,9 @@ const makeImageBlock = (facePath) => ({
         <i>Please use your mouse and the slider below to make your selection.</i></p>`,
       html: `<input type='range' name='response' min='1' max='13' step='1' style='width: 100%;'><br>${heightLabels}`,
       data: { question: "tall", stimulus: facePath, modality: "image" },
-      on_finish: logToFirebase
+      on_finish: function(data) {
+        logToFirebase(data);
+}
     }
   ]
 });
@@ -191,7 +201,9 @@ const makeAudioBlock = (audioPath) => ({
                <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
              </div>`,
       data: { question: "dominant", stimulus: audioPath, modality: "audio" },
-      on_finish: logToFirebase
+      on_finish: function(data) {
+        logToFirebase(data);
+}
     },
     {
       type: jsPsychSurveyHtmlForm,
@@ -203,7 +215,9 @@ const makeAudioBlock = (audioPath) => ({
                <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
              </div>`,
       data: { question: "trustworthy", stimulus: audioPath, modality: "audio" },
-      on_finish: logToFirebase
+      on_finish: function(data) {
+        logToFirebase(data);
+}
     },
     {
       type: jsPsychSurveyHtmlForm,
@@ -215,7 +229,9 @@ const makeAudioBlock = (audioPath) => ({
                <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
              </div>`,
       data: { question: "honest", stimulus: audioPath, modality: "audio" },
-      on_finish: logToFirebase
+      on_finish: function(data) {
+        logToFirebase(data);
+}
     },
     {
       type: jsPsychSurveyHtmlForm,
@@ -227,7 +243,10 @@ const makeAudioBlock = (audioPath) => ({
                <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
              </div>`,
       data: { question: "attractive", stimulus: audioPath, modality: "audio" },
-      on_finish: logToFirebase
+      on_finish: function(data) {
+        logToFirebase(data);
+}
+
     },
     {
       type: jsPsychSurveyHtmlForm,
@@ -236,7 +255,10 @@ const makeAudioBlock = (audioPath) => ({
         <i>Please use your mouse and the slider below to make your selection.</i></p>`,
       html: `<input type='range' name='response' min='1' max='13' step='1' style='width: 100%;'><br>${heightLabels}`,
       data: { question: "tall", stimulus: audioPath, modality: "audio" },
-      on_finish: logToFirebase
+      on_finish: function(data) {
+        logToFirebase(data);
+}
+
     },
 
     {
@@ -251,7 +273,9 @@ const makeAudioBlock = (audioPath) => ({
        </div>
      `,
      data: { question: "human_voice", stimulus: audioPath, modality: "audio" },
-     on_finish: logToFirebase
+     on_finish: function(data) {
+        logToFirebase(data);
+}
     }
   ]
 });
