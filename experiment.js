@@ -66,7 +66,7 @@ const general_instructions = {
   stimulus: `
     <p>Welcome to the experiment. This experiment will take approximately <strong>30 minutes</strong> to complete.</p>
     <p>Please make sure you are in a quiet space and have a strong Wi-Fi connection while doing this experiment.</p>
-    <p>If you wish to stop at any point, simply close this tab and your data will not be recorded.</p>
+    <p>If you wish to stop participating in this study at any point, simply close the window and your data will not be recorded.</p>
     <p style="margin-top: 40px;">Press SPACE to continue.</p>
     `,
   choices: [' ']
@@ -243,144 +243,218 @@ const makeImageBlock = (facePath) => {
 };
 
 // === AUDIO BLOCK ===
-const makeAudioBlock = (audioPath) => ({
-  timeline: [
-    {
-      type: jsPsychSurveyHtmlForm,
-      preamble: `<audio controls controlsList="noplaybackrate"><source src="${audioPath}" type="audio/wav"></audio><br>
-        <p><b> How dominant do you think this person is, based on their voice? (1 = Not dominant at all, 7 = Very dominant)</b><br>
-        <i>Please use your mouse and the slider below to make your selection.</i><br>
-        <i>You can replay this audio as many times as you like while answering.</i></p>`,
-      html: `<input type='range' name='response' min='1' max='7' step='1' style='width: 100%;'><br>
-             <div style='display: flex; justify-content: space-between;'>
-               <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
-             </div>
-             <input type="hidden" name="audio_played" value="false">`,
-      data: { question: "dominant", stimulus: audioPath, modality: "audio" },
-      on_load: () => {
-        const aud = jsPsych.getDisplayElement().querySelector("audio");
-        const audioPlayedInput = jsPsych.getDisplayElement().querySelector("input[name='audio_played']");
-        if (aud) aud.playbackRate = 1.0;
-        if (aud && audioPlayedInput) {
-          aud.addEventListener("ended", () => {
-            audioPlayedInput.value = "true";
-          });
+
+const makeAudioBlock = (audioPath) => {
+  // Set height range & labels based on group
+  let minHeight, maxHeight, heightLabelsAudio;
+  if (group === "female") {
+    minHeight = 1;   // 5'0"
+    maxHeight = 13;  // 6'0"
+    heightLabelsAudio = `
+      <div style='display: flex; justify-content: space-between; font-size: 12px;'>
+        <span>5'0"</span><span>5'1"</span><span>5'2"</span><span>5'3"</span><span>5'4"</span>
+        <span>5'5"</span><span>5'6"</span><span>5'7"</span><span>5'8"</span><span>5'9"</span>
+        <span>5'10"</span><span>5'11"</span><span>6'0"</span>
+      </div>`;
+  } else { // male
+    minHeight = 6;   // 5'5"
+    maxHeight = 18;  // 6'5"
+    heightLabelsAudio = `
+      <div style='display: flex; justify-content: space-between; font-size: 12px;'>
+        <span>5'5"</span><span>5'6"</span><span>5'7"</span><span>5'8"</span>
+        <span>5'9"</span><span>5'10"</span><span>5'11"</span><span>6'0"</span>
+        <span>6'1"</span><span>6'2"</span><span>6'3"</span><span>6'4"</span><span>6'5"</span>
+      </div>`;
+  }
+
+  const gateTrial = {
+    type: jsPsychSurveyHtmlForm,
+    preamble: `
+      <audio id="audioStim" autoplay controls controlsList="noplaybackrate">
+        <source src="${audioPath}" type="audio/wav">
+      </audio>
+      <p><b>Please listen to the entire audio clip before continuing.</b></p>
+      <p>Once you finish listening, you will answer a series of questions about this clip on the following pages.</p>
+      <p><i>You cannot continue until the audio has finished playing.</i></p>
+    `,
+    html: `<p></p>`, // no questions for the gate trial
+    button_label: "Continue",
+    on_load: () => {
+      const aud = document.getElementById("audioStim");
+      const btnInterval = setInterval(() => {
+        const btn = document.querySelector(".jspsych-btn");
+        if (btn && aud) {
+          btn.disabled = true;
+          aud.onended = () => {
+            btn.disabled = false; // enable button after audio finishes
+          };
+          clearInterval(btnInterval);
+        }
+      }, 50);
+     },
+    data: { stimulus: audioPath, modality: "audio" }
+  };
+
+  return {
+    timeline: [
+      gateTrial,
+      {
+        type: jsPsychSurveyHtmlForm,
+        preamble: `
+          <audio id="audioStim" controls controlsList="noplaybackrate">
+            <source src="${audioPath}" type="audio/wav">
+          </audio>
+          <p><b>How dominant do you think this person is, based on their voice? (1 = Not dominant at all, 7 = Very dominant)</b><br>
+          <i>Please use your mouse and the slider below to make your selection.</i><br>
+          <i>You can replay this audio as many times as you like.</i></p>
+        `,
+        html: `
+          <input type='range' name='response' min='1' max='7' step='1' style='width: 100%;'><br>
+          <div style='display: flex; justify-content: space-between;'>
+            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
+          </div>
+        `,
+        button_label: "Continue",
+        on_load: () => {
+          const aud = document.getElementById("audioStim");
+          if (aud) aud.playbackRate = 1.0;
+
+        },
+        data: { question: "dominant", stimulus: audioPath, modality: "audio" },
+        on_finish: function(data) {
+          logToFirebase(data);
         }
       },
-   
-      on_finish: function(data) {
-        const audioPlayedInput = jsPsych.getDisplayElement().querySelector("input[name='audio_played']");
-        if (!audioPlayedInput || audioPlayedInput.value !== "true") {
-          alert("Please listen to the audio at least once before continuing.");
-          return false;
+      {
+        type: jsPsychSurveyHtmlForm,
+        preamble: `
+          <audio controls controlsList="noplaybackrate">
+            <source src="${audioPath}" type="audio/wav">
+          </audio><br>
+          <p><b>How trustworthy do you think this person is, based on their voice? (1 = Not trustworthy at all, 7 = Very trustworthy)</b><br>
+          <i>Please use your mouse and the slider below to make your selection.</i><br>
+          <i>You can replay this audio as many times as you like while answering.</i></p>
+        `,
+        html: `
+          <input type='range' name='response' min='1' max='7' step='1' style='width: 100%;'><br>
+          <div style='display: flex; justify-content: space-between;'>
+            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
+          </div>
+        `,
+        data: { question: "trustworthy", stimulus: audioPath, modality: "audio" },
+        on_start: () => {
+          const aud = jsPsych.getDisplayElement().querySelector("audio");
+          if (aud) aud.playbackRate = 1.0;
+        },
+        on_finish: function(data) {
+          logToFirebase(data);
         }
-        logToFirebase(data);
-}
-    },
-    {
-      type: jsPsychSurveyHtmlForm,
-      preamble: `<audio controls controlsList="noplaybackrate"><source src="${audioPath}" type="audio/wav"></audio><br>
-        <p><b> How trustworthy do you think this person is, based on their voice? (1 = Not trustworthy at all, 7 = Very trustworthy)</b><br>
-        <i>Please use your mouse and the slider below to make your selection.</i><br>
-        <i>You can replay this audio as many times as you like while answering.</i></p>`,
-      html: `<input type='range' name='response' min='1' max='7' step='1' style='width: 100%;'><br>
-             <div style='display: flex; justify-content: space-between;'>
-               <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
-             </div>`,
-      data: { question: "trustworthy", stimulus: audioPath, modality: "audio" },
-      on_start: () => {
-        const aud = jsPsych.getDisplayElement().querySelector("audio");
-        if (aud) aud.playbackRate = 1.0;
       },
-      on_finish: function(data) {
-        logToFirebase(data);
-}
-    },
-    {
-      type: jsPsychSurveyHtmlForm,
-      preamble: `<audio controls controlsList="noplaybackrate"><source src="${audioPath}" type="audio/wav"></audio><br>
-        <p><b> How honest do you think this person is, based on their voice? (1 = Not honest at all, 7 = Very honest)</b><br>
-        <i>Please use your mouse and the slider below to make your selection.</i><br>
-        <i>You can replay this audio as many times as you like while answering.</i></p>`,
-      html: `<input type='range' name='response' min='1' max='7' step='1' style='width: 100%;'><br>
-             <div style='display: flex; justify-content: space-between;'>
-               <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
-             </div>`,
-      data: { question: "honest", stimulus: audioPath, modality: "audio" },
-      on_start: () => {
-        const aud = jsPsych.getDisplayElement().querySelector("audio");
-        if (aud) aud.playbackRate = 1.0;
+      {
+        type: jsPsychSurveyHtmlForm,
+        preamble: `
+          <audio controls controlsList="noplaybackrate">
+            <source src="${audioPath}" type="audio/wav">
+          </audio><br>
+          <p><b>How honest do you think this person is, based on their voice? (1 = Not honest at all, 7 = Very honest)</b><br>
+          <i>Please use your mouse and the slider below to make your selection.</i><br>
+          <i>You can replay this audio as many times as you like while answering.</i></p>
+        `,
+        html: `
+          <input type='range' name='response' min='1' max='7' step='1' style='width: 100%;'><br>
+          <div style='display: flex; justify-content: space-between;'>
+            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
+          </div>
+        `,
+        data: { question: "honest", stimulus: audioPath, modality: "audio" },
+        on_start: () => {
+          const aud = jsPsych.getDisplayElement().querySelector("audio");
+          if (aud) aud.playbackRate = 1.0;
+        },
+        on_finish: function(data) {
+          logToFirebase(data);
+        }
       },
-      on_finish: function(data) {
-        logToFirebase(data);
-}
-    },
-    {
-      type: jsPsychSurveyHtmlForm,
-      preamble: `<audio controls controlsList="noplaybackrate"><source src="${audioPath}" type="audio/wav"></audio><br>
-        <p><b> How attractive do you think this person is, based on their voice? (1 = Not attractive at all, 7 = Very attractive)</b><br>
-        <i>Please use your mouse and the slider below to make your selection.</i><br>
-        <i>You can replay this audio as many times as you like while answering.</i></p>`,
-      html: `<input type='range' name='response' min='1' max='7' step='1' style='width: 100%;'><br>
-             <div style='display: flex; justify-content: space-between;'>
-               <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
-             </div>`,
-      data: { question: "attractive", stimulus: audioPath, modality: "audio" },
-      on_start: () => {
-        const aud = jsPsych.getDisplayElement().querySelector("audio");
-        if (aud) aud.playbackRate = 1.0;
+      {
+        type: jsPsychSurveyHtmlForm,
+        preamble: `
+          <audio controls controlsList="noplaybackrate">
+            <source src="${audioPath}" type="audio/wav">
+          </audio><br>
+          <p><b>How attractive do you think this person is, based on their voice? (1 = Not attractive at all, 7 = Very attractive)</b><br>
+          <i>Please use your mouse and the slider below to make your selection.</i><br>
+          <i>You can replay this audio as many times as you like while answering.</i></p>
+        `,
+        html: `
+          <input type='range' name='response' min='1' max='7' step='1' style='width: 100%;'><br>
+          <div style='display: flex; justify-content: space-between;'>
+            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
+          </div>
+        `,
+        data: { question: "attractive", stimulus: audioPath, modality: "audio" },
+        on_start: () => {
+          const aud = jsPsych.getDisplayElement().querySelector("audio");
+          if (aud) aud.playbackRate = 1.0;
+        },
+        on_finish: function(data) {
+          logToFirebase(data);
+        }
       },
-      on_finish: function(data) {
-        logToFirebase(data);
-}
-    },
-    {
-      type: jsPsychSurveyHtmlForm,
-      preamble: `<audio controls controlsList="noplaybackrate"><source src="${audioPath}" type="audio/wav"></audio><br>
-        <p><b> How tall do you think this person is, based on their voice?</b><br>
-        <i>Please use your mouse and the slider below to make your selection.</i><br>
-        <i>You can replay this audio as many times as you like while answering.</i></p>`,
-      html: `<input type='range' name='response' min='1' max='13' step='1' style='width: 100%;'><br>${heightLabels}`,
-      data: { question: "tall", stimulus: audioPath, modality: "audio" },
-      on_start: () => {
-        const aud = jsPsych.getDisplayElement().querySelector("audio");
-        if (aud) aud.playbackRate = 1.0;
+      {
+        type: jsPsychSurveyHtmlForm,
+        preamble: `
+          <audio controls controlsList="noplaybackrate">
+            <source src="${audioPath}" type="audio/wav">
+          </audio><br>
+          <p><b>How tall do you think this person is, based on their voice?</b><br>
+          <i>Please use your mouse and the slider below to make your selection.</i><br>
+          <i>You can replay this audio as many times as you like while answering.</i></p>
+        `,
+        html: `<input type='range' name='response' min='${minHeight}' max='${maxHeight}' step='1' style='width: 100%;'><br>${heightLabelsAudio}`,
+        data: { question: "tall", stimulus: audioPath, modality: "audio" },
+        on_start: () => {
+          const aud = jsPsych.getDisplayElement().querySelector("audio");
+          if (aud) aud.playbackRate = 1.0;
+        },
+        on_finish: function(data) {
+          logToFirebase(data);
+        }
       },
-      on_finish: function(data) {
-        logToFirebase(data);
-}
-    },
-    {
-      type: jsPsychSurveyHtmlForm,
-      preamble: `<audio controls controlsList="noplaybackrate"><source src="${audioPath}" type="audio/wav"></audio><br>
-      <p><b>Does this voice sound more human or robotic to you?</b>
-      <i>You can replay this audio as many times as you like while answering.</i></p>
-      `,
-      html: `
-        <div>
-          <label>
-            <input type="radio" name="response" value="human" required>
-            Human
-          </label>
-        </div>
-        <div>
-          <label>
-            <input type="radio" name="response" value="robotic">
-            Robotic
-          </label>
-        </div>
-      `,
-      data: { question: "human_voice", stimulus: audioPath, modality: "audio" },
-      on_start: () => {
-        const aud = jsPsych.getDisplayElement().querySelector("audio");
-        if (aud) aud.playbackRate = 1.0;
-      },
-     on_finish: function(data) {
-        logToFirebase(data);
-}
-    }
-  ]
-}); 
+      {
+        type: jsPsychSurveyHtmlForm,
+        preamble: `
+          <audio controls controlsList="noplaybackrate">
+            <source src="${audioPath}" type="audio/wav">
+          </audio><br>
+          <p><b>Does this voice sound more human or robotic to you?</b><br>
+          <i>You can replay this audio as many times as you like while answering.</i></p>
+        `,
+        html: `
+          <div>
+            <label>
+              <input type="radio" name="response" value="human" required>
+              Human
+            </label>
+          </div>
+          <div>
+            <label>
+              <input type="radio" name="response" value="robotic">
+              Robotic
+            </label>
+          </div>
+        `,
+        data: { question: "human_voice", stimulus: audioPath, modality: "audio" },
+        on_start: () => {
+          const aud = jsPsych.getDisplayElement().querySelector("audio");
+          if (aud) aud.playbackRate = 1.0;
+        },
+        on_finish: function(data) {
+          logToFirebase(data);
+        }
+      }
+    ]
+  };
+};
 
 function addBlockLabelToTrial(trial, blockLabel) {
   trial.timeline = trial.timeline.map(t => {
