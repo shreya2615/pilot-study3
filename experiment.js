@@ -465,7 +465,7 @@ const makeAudioBlock = (audioPath) => {
 
 function addBlockLabelToTrial(trial, blockLabel) {
   trial.timeline = trial.timeline.map(t => {
-    const labelHtml = `<div style="text-align:center; font-size:28px; color:#999; opacity:0.3; position: fixed; top: 5px; left: 50%; transform: translateX(-50%); z-index: 1000;">
+    const labelHtml = `<div style="text-align:center; font-size:14px; color:#999; opacity:0.5; position: fixed; top: 5px; left: 50%; transform: translateX(-50%); z-index: 1000;">
                          Block ${blockLabel.toUpperCase()}
                        </div>`;
 
