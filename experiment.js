@@ -4,10 +4,10 @@ style.innerHTML = `
     font-size: 23px !important;
   }
   #jspsych-progressbar-container {
-    height: 30px !important;   /* make container taller */
+    height: 40px !important;   /* make container taller */
   }
   #jspsych-progressbar {
-    height: 30px !important;   /* make the bar itself taller */
+    height: 40px !important;   /* make the bar itself taller */
   }
 `;
 document.head.appendChild(style);
