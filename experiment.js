@@ -3,8 +3,15 @@ style.innerHTML = `
   body {
     font-size: 23px !important;
   }
+  #jspsych-progressbar-container {
+    height: 30px !important;   /* make container taller */
+  }
+  #jspsych-progressbar {
+    height: 30px !important;   /* make the bar itself taller */
+  }
 `;
 document.head.appendChild(style);
+
 
 // Initialize Firebase (put at the top of experiment.js)
 const firebaseConfig = {
@@ -458,7 +465,7 @@ const makeAudioBlock = (audioPath) => {
 
 function addBlockLabelToTrial(trial, blockLabel) {
   trial.timeline = trial.timeline.map(t => {
-    const labelHtml = `<div style="text-align:center; font-size:12px; color:#999; opacity:0.3; position: fixed; top: 5px; left: 50%; transform: translateX(-50%); z-index: 1000;">
+    const labelHtml = `<div style="text-align:center; font-size:28px; color:#999; opacity:0.3; position: fixed; top: 5px; left: 50%; transform: translateX(-50%); z-index: 1000;">
                          Block ${blockLabel.toUpperCase()}
                        </div>`;
 
