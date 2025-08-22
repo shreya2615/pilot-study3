@@ -71,7 +71,7 @@ const logToFirebase = (trialData) => {
 const general_instructions = {
   type: jsPsychHtmlKeyboardResponse,
   stimulus: `
-    <p>Welcome to the experiment. This experiment will take approximately <strong>30 minutes</strong> to complete.</p>
+    <p>Welcome to the experiment. This experiment will take approximately <strong>45 minutes</strong> to complete.</p>
     <p>Please make sure you are in a quiet space and have a strong Wi-Fi connection while doing this experiment.</p>
     <p>If you wish to stop participating in this study at any point, simply close the window and your data will not be recorded.</p>
     <p style="margin-top: 40px;">Press SPACE to continue.</p>
