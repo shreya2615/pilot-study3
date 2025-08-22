@@ -582,8 +582,12 @@ timeline.push({
   type: jsPsychHtmlKeyboardResponse,
   stimulus: `
     <h2>Thank you for participating!</h2>
-    <p>Your responses have been recorded please click on the link below to be redirected to cloud research and then close this window.</p>
-    <p>https://connect.cloudresearch.com/participant/project/4DC7DE4B25/complete.</p>
+    <p>Your responses have been recorded. Please click on the link below to be redirected to CloudResearch and then close this window.</p>
+    <p>
+      <a href="https://connect.cloudresearch.com/participant/project/4DC7DE4B25/complete" target="_blank">
+        Click here to return to CloudResearch
+      </a>
+    </p>
   `,
   choices: "NO_KEYS",
   trial_duration: 15000
